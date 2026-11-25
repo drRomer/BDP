@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<link rel="icon" type="image/png" href="__ICON192__">
+<link rel="apple-touch-icon" href="__ICON180__">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0e1622">
@@ -44,9 +46,13 @@ button{font-family:inherit;cursor:pointer}
 #weap i{width:12px;height:12px;border-radius:50%;background:#6ee6ff;box-shadow:0 0 10px #6ee6ff}
 /* Screens */
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(var(--sat) + 18px) calc(var(--sar) + 18px) calc(var(--sab) + 18px) calc(var(--sal) + 18px);background:linear-gradient(180deg,rgba(8,14,24,.25),rgba(8,14,24,.85) 62%);overflow-y:auto}
+.shield{width:min(34vw,150px);aspect-ratio:420/463;background:url(__SHIELD__) center/contain no-repeat;filter:drop-shadow(0 5px 10px rgba(0,0,0,.5));flex:none}
+#menu{overflow-y:auto;justify-content:safe center}
+#menu .shield{width:min(22vw,84px)}
+#menu .logo b{font-size:clamp(34px,11vw,52px)}
 .logo{text-align:center;line-height:.92;filter:drop-shadow(0 5px 0 rgba(0,0,0,.4))}
-.logo small{display:block;font:400 20px "Russo One";letter-spacing:.34em;color:#9fe9ff;padding-left:.34em}
-.logo b{display:block;font:400 clamp(46px,15vw,72px) "Russo One";background:linear-gradient(180deg,#fff 35%,#79d6ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo small{display:block;font:400 18px "Russo One";letter-spacing:.34em;color:#9db7c8;padding-left:.34em}
+.logo b{display:block;font:400 clamp(46px,15vw,72px) "Russo One";color:#ecebe2}
 .tag{font:500 14px Rubik;color:#d5e6f3;text-align:center;max-width:320px;line-height:1.35}
 .big{min-width:250px;padding:16px 26px;border:0;border-radius:18px;font:400 21px "Russo One";color:#fff;background:linear-gradient(180deg,#45a3ff,#1f6fe0);box-shadow:0 6px 0 #154c9c,0 12px 26px rgba(30,120,255,.4);letter-spacing:.04em}
 .big:active{transform:translateY(4px);box-shadow:0 2px 0 #154c9c}
@@ -98,11 +104,13 @@ h1.et{font:400 clamp(28px,9vw,40px) "Russo One";text-align:center;line-height:1.
 </div>
 
 <div id="loadScr" class="screen">
+  <div class="shield" role="img" aria-label="Escudo de Brigada del Puente"></div>
   <div class="logo"><small>BRIGADA DEL</small><b>PUENTE</b></div>
   <div class="loadbox"><div class="lb"><i id="loadFill"></i></div><div id="loadTxt">Preparando…</div></div>
 </div>
 
 <div id="menu" class="screen hidden">
+  <div class="shield" role="img" aria-label="Escudo de Brigada del Puente"></div>
   <div class="logo"><small>BRIGADA DEL</small><b>PUENTE</b></div>
   <div class="tag">El juego del anuncio… pero esta vez existe de verdad.</div>
   <button id="bPlay" class="big" type="button">JUGAR · NIVEL <span id="mLv">1</span></button>

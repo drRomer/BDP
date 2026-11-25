@@ -673,5 +673,9 @@ rep("otext(cw?'ARMA':'TROPA',PJ.x,y0+H2*(cw?.66:.7),fs,cw?'#ffe27a':'#e6f3ff','#
 rep("ctx.strokeStyle=cw?'#ffd34a':'#6fb6ff';", "ctx.strokeStyle=tq?c.wp.hex:cw?'#ffd34a':'#6fb6ff';")
 baked_line = 'window.__BAKED=' + json.dumps(baked, separators=(',', ':')) + ';window.__SFX=' + json.dumps(SFX, separators=(',', ':')) + ';'
 html = '\n'.join(HEAD + [baked_line] + [lines[NH + 1]] + [js])
+import base64 as _b
+def _du(f): return 'data:image/png;base64,' + _b.b64encode(open('/home/claude/brigada/out/' + f, 'rb').read()).decode()
+for _k, _f in (('__SHIELD__', 'logo_shield.png'), ('__ICON192__', 'icon-192.png'), ('__ICON180__', 'icon-180.png')):
+    html = html.replace(_k, _du(_f))
 open(OUT, 'w', encoding='utf-8').write(html)
 print('pack',[(a,round(b/1e6,2),round(c/1e6,2)) for a,b,c in PACK_STATS]);print('wrote', OUT, len(html) // 1024, 'KB; baked', {k: len(v['src']) // 1024 for k, v in baked.items()})
