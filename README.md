@@ -2,7 +2,7 @@
 
 Runner shooter de escuadrón en HTML5 Canvas (pseudo-3D). Sin anuncios ni inicio de sesión: el progreso se guarda solo en el navegador.
 
-**Jugar:** https://drromer.github.io/brigada-del-puente/
+**Jugar:** https://drromer.github.io/BDP/
 
 ## Estructura
 - `src/game.js`, `src/head.html`: juego y cabecera (CSS/HUD).
