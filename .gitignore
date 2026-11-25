@@ -1,0 +1,7 @@
+__pycache__/
+out/index*.html
+out/prof_*.html
+out/eq_*.html
+in/
+viewer/node_modules/
+shots/

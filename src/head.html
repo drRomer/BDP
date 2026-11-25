@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0e1622">
+<title>Brigada del Puente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Rubik:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);--sar:env(safe-area-inset-right,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#0e1622;overscroll-behavior:none}
+body{position:fixed;inset:0;font-family:Rubik,system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff}
+canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;display:block}
+.hidden{display:none!important}
+button{font-family:inherit;cursor:pointer}
+/* HUD */
+#hud{position:absolute;inset:0;pointer-events:none}
+.top{position:absolute;left:0;right:0;top:0;padding:calc(var(--sat) + 10px) calc(var(--sar) + 12px) 0 calc(var(--sal) + 12px);display:flex;align-items:center;gap:10px}
+.ib{pointer-events:auto;width:40px;height:40px;flex:none;border-radius:12px;border:2px solid rgba(255,255,255,.22);background:rgba(10,18,30,.55);color:#fff;font:900 14px Rubik,system-ui;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lvbox{flex:1;min-width:0}
+#lvText{font:400 14px "Russo One",Rubik,system-ui;letter-spacing:.08em;text-shadow:0 2px 0 rgba(0,0,0,.45)}
+.prog{position:relative;height:10px;margin-top:6px;margin-right:12px;border-radius:9px;background:rgba(10,18,30,.6);border:1.5px solid rgba(255,255,255,.22)}
+.prog i{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:9px;background:linear-gradient(90deg,#2f8bff,#6ee6ff)}
+.prog b{position:absolute;right:-12px;top:50%;transform:translateY(-50%);height:20px;padding:0 6px;border-radius:10px;background:#c22a35;border:2px solid #fff;font:900 9px Rubik;display:grid;place-items:center;letter-spacing:.05em}
+.coins{display:flex;align-items:center;gap:6px;background:rgba(10,18,30,.55);border:2px solid rgba(255,255,255,.22);border-radius:12px;padding:0 10px;height:40px;font:900 16px Rubik;flex:none}
+.coin{display:inline-block;width:16px;height:16px;flex:none;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff4b8,#ffc83d 45%,#c98a12);box-shadow:inset 0 0 0 2px #8a5d07}
+#bossBar{position:absolute;left:50%;transform:translateX(-50%);top:calc(var(--sat) + 62px);width:min(330px,74vw);text-align:center}
+#bossBar .bn{font:400 12px "Russo One";letter-spacing:.18em;color:#ffd7d7;text-shadow:0 2px 0 rgba(0,0,0,.5)}
+#bossBar .bb{height:12px;margin-top:4px;border-radius:8px;background:rgba(20,6,8,.7);border:2px solid rgba(255,255,255,.7);overflow:hidden}
+#bossBar .bb i{display:block;height:100%;width:100%;background:linear-gradient(180deg,#ff6a6a,#d1192b);transition:width .12s}
+#hint{position:absolute;left:0;right:0;bottom:calc(var(--sab) + 120px);text-align:center;font:700 15px Rubik;text-shadow:0 2px 6px rgba(0,0,0,.7);transition:opacity .6s;padding:0 30px}
+#hint span{display:inline-block;background:rgba(10,18,30,.5);border-radius:14px;padding:8px 14px}
+#bSlash{--p:0%;pointer-events:auto;position:absolute;right:calc(var(--sar) + 16px);bottom:calc(var(--sab) + 22px);width:78px;height:78px;border-radius:50%;border:0;padding:5px;background:conic-gradient(#6ee6ff var(--p),rgba(255,255,255,.14) 0);box-shadow:0 6px 18px rgba(0,0,0,.45)}
+#bSlash span{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 50% 35%,#284a72,#0f1d31);font:400 15px "Russo One";letter-spacing:.06em;color:#9fdcf2}
+#bSlash.ready span{background:radial-gradient(circle at 50% 35%,#7ff0ff,#1d7fd6);color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+#bSlash.ready{animation:pulse .9s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(110,230,255,.25),0 0 30px rgba(110,230,255,.8)}}
+#weap{position:absolute;left:calc(var(--sal) + 14px);bottom:calc(var(--sab) + 30px);font:400 13px "Russo One";letter-spacing:.08em;background:rgba(10,18,30,.55);border:2px solid rgba(255,255,255,.2);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px}
+#tw{position:absolute;left:calc(var(--sal) + 14px);bottom:calc(var(--sab) + 82px);font:400 13px "Russo One";letter-spacing:.08em;background:rgba(10,18,30,.6);border:2px solid var(--c,#fff);border-radius:12px;padding:7px 12px 9px;min-width:150px;color:var(--c,#fff)}
+#tw b{display:block;height:5px;margin-top:5px;border-radius:3px;background:var(--c,#fff)}
+#weap i{width:12px;height:12px;border-radius:50%;background:#6ee6ff;box-shadow:0 0 10px #6ee6ff}
+/* Screens */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:calc(var(--sat) + 18px) calc(var(--sar) + 18px) calc(var(--sab) + 18px) calc(var(--sal) + 18px);background:linear-gradient(180deg,rgba(8,14,24,.25),rgba(8,14,24,.85) 62%);overflow-y:auto}
+.logo{text-align:center;line-height:.92;filter:drop-shadow(0 5px 0 rgba(0,0,0,.4))}
+.logo small{display:block;font:400 20px "Russo One";letter-spacing:.34em;color:#9fe9ff;padding-left:.34em}
+.logo b{display:block;font:400 clamp(46px,15vw,72px) "Russo One";background:linear-gradient(180deg,#fff 35%,#79d6ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{font:500 14px Rubik;color:#d5e6f3;text-align:center;max-width:320px;line-height:1.35}
+.big{min-width:250px;padding:16px 26px;border:0;border-radius:18px;font:400 21px "Russo One";color:#fff;background:linear-gradient(180deg,#45a3ff,#1f6fe0);box-shadow:0 6px 0 #154c9c,0 12px 26px rgba(30,120,255,.4);letter-spacing:.04em}
+.big:active{transform:translateY(4px);box-shadow:0 2px 0 #154c9c}
+.big.red{background:linear-gradient(180deg,#ff6b6b,#d8283a);box-shadow:0 6px 0 #8f1622,0 12px 26px rgba(255,60,80,.35)}
+.sec{padding:11px 16px;border-radius:13px;border:1.5px solid rgba(255,255,255,.25);background:rgba(12,22,36,.6);color:#fff;font:700 14px Rubik}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.panel{width:min(420px,100%);background:rgba(12,20,34,.8);border:1.5px solid rgba(140,200,255,.18);border-radius:18px;padding:12px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.shopHead{display:flex;justify-content:space-between;align-items:center;font:400 15px "Russo One";letter-spacing:.1em;margin:2px 4px 6px}
+.shopHead span{display:flex;align-items:center;gap:6px;font:900 15px Rubik;letter-spacing:0}
+.upg{display:flex;align-items:center;gap:10px;padding:9px;border-radius:12px;background:rgba(255,255,255,.045);margin-top:6px}
+.upg .ic{width:40px;height:40px;flex:none;border-radius:11px;display:grid;place-items:center;font-size:20px;background:linear-gradient(180deg,#2c4f7c,#1b3354)}
+.upg .tx{flex:1;min-width:0}
+.upg .tx b{font:700 14px Rubik;display:block}
+.upg .tx span{font:500 12px Rubik;color:#a9bfd3}
+.buy{border:0;border-radius:11px;padding:9px 10px;min-width:80px;font:900 14px Rubik;color:#3a2600;background:linear-gradient(180deg,#ffe07a,#f5b622);box-shadow:0 3px 0 #a87508;display:flex;align-items:center;gap:6px;justify-content:center}
+.buy:active{transform:translateY(2px);box-shadow:0 1px 0 #a87508}
+.buy[disabled]{filter:grayscale(1);opacity:.45}
+.buy .coin{background:radial-gradient(circle at 35% 35%,#fffbe0,#ffd04a 40%,#a86c06);box-shadow:inset 0 0 0 2px #6e4704,0 1px 0 rgba(255,255,255,.6)}
+h1.et{font:400 clamp(28px,9vw,40px) "Russo One";text-align:center;line-height:1.05;text-shadow:0 4px 0 rgba(0,0,0,.4)}
+.esub{font:700 15px Rubik;color:#bcd3e6}
+.stats{width:min(340px,100%)}
+.stats div{display:flex;justify-content:space-between;padding:10px 14px;border-radius:12px;background:rgba(255,255,255,.06);margin-top:6px;font:700 15px Rubik}
+.stats div b{font:900 16px Rubik}
+.how{text-align:left;font:500 14px/1.45 Rubik;color:#dbe8f3}
+.how li{margin:6px 0 6px 18px}
+.how b{color:#fff}
+.noads{font:700 11px Rubik;letter-spacing:.12em;color:#7fdcff;opacity:.85;text-transform:uppercase}
+.loadbox{width:min(300px,80vw);text-align:center;margin-top:18px}
+.lb{height:10px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden;margin-bottom:12px;border:1.5px solid rgba(255,255,255,.18)}
+.lb i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2f8bff,#6ee6ff);transition:width .25s}
+#loadTxt{font:700 14px Rubik,system-ui;color:#bcd3e6}
+#loadScr{background:radial-gradient(circle at 50% 40%,#1c2c44,#0b121c 70%)}
+</style>
+</head>
+<body>
+<canvas id="c" aria-label="Brigada del Puente"></canvas>
+
+<div id="hud" class="hidden">
+  <div class="top">
+    <button id="bPause" class="ib" type="button" aria-label="Pausa">II</button>
+    <div class="lvbox"><div id="lvText">NIVEL 1</div><div class="prog"><i id="progFill"></i><b>JEFE</b></div></div>
+    <div class="coins"><span class="coin"></span><span id="coinText">0</span></div>
+  </div>
+  <div id="bossBar" class="hidden"><div class="bn">TITÁN DEL PUENTE</div><div class="bb"><i id="bossFill"></i></div></div>
+  <div id="hint"><span>◀ Desliza para mover ▶<br><small>Dispara a las puertas para subir su número</small></span></div>
+  <div id="tw" class="hidden"><span id="twText"></span><b id="twBar"></b></div>
+  <div id="weap"><i></i><span id="weapText">ARMA NV 1</span></div>
+  <button id="bSlash" type="button" aria-label="Tajo de energía"><span>TAJO</span></button>
+</div>
+
+<div id="loadScr" class="screen">
+  <div class="logo"><small>BRIGADA DEL</small><b>PUENTE</b></div>
+  <div class="loadbox"><div class="lb"><i id="loadFill"></i></div><div id="loadTxt">Preparando…</div></div>
+</div>
+
+<div id="menu" class="screen hidden">
+  <div class="logo"><small>BRIGADA DEL</small><b>PUENTE</b></div>
+  <div class="tag">El juego del anuncio… pero esta vez existe de verdad.</div>
+  <button id="bPlay" class="big" type="button">JUGAR · NIVEL <span id="mLv">1</span></button>
+  <div class="panel">
+    <div class="shopHead">MEJORAS <span><i class="coin"></i><b id="shopCoins">0</b></span></div>
+    <div id="shopList"></div>
+  </div>
+  <div class="row">
+    <button id="bSound" class="sec" type="button">Sonido: Sí</button>
+    <button id="bHow" class="sec" type="button">Cómo jugar</button>
+  </div>
+  <div class="noads">Sin anuncios · sin trampas · 100% jugable</div>
+</div>
+
+<div id="howScr" class="screen hidden">
+  <div class="panel how">
+    <div class="shopHead">CÓMO JUGAR</div>
+    <ul>
+      <li><b>Desliza</b> el dedo para mover al escuadrón. Disparan solos.</li>
+      <li>Puertas <b style="color:#6ab8ff">azules</b> suman o multiplican; las <b style="color:#ff7a84">rojas</b> restan. <b>Dispárales</b> para subir su número.</li>
+      <li>Cajas <b>ARMA</b> mejoran tus balas; cajas <b>TROPA</b> suman soldados. Si no las rompes, aplastan a quien choque con ellas.</li>
+      <li>En la vereda izquierda duerme el <b style="color:#9ff0ff">Guardián</b>, sellado en cristal. Los soldados que vayan por la <b>izquierda</b> le disparan: rompe el cristal antes de pasarlo y pelea a tu lado.</li>
+      <li>El <b>Titán</b> marca franjas rojas en el suelo: sal de ellas antes del golpe.</li>
+      <li>Llena el anillo y toca <b>TAJO</b>: barre la horda, sube las puertas y daña al jefe.</li>
+      <li>Las monedas compran mejoras permanentes.</li>
+    </ul>
+  </div>
+  <button id="bHowBack" class="big" type="button">ENTENDIDO</button>
+</div>
+
+<div id="pauseScr" class="screen hidden">
+  <h1 class="et">PAUSA</h1>
+  <button id="bResume" class="big" type="button">CONTINUAR</button>
+  <button id="bQuit" class="sec" type="button">Salir al menú</button>
+</div>
+
+<div id="endScr" class="screen hidden">
+  <h1 id="eTitle" class="et"></h1>
+  <div id="eSub" class="esub"></div>
+  <div id="eStats" class="stats"></div>
+  <button id="bNext" class="big" type="button"></button>
+  <button id="bToMenu" class="sec" type="button">Mejoras y menú</button>
+</div>
+
+<script>
+
+</script>
+<script>

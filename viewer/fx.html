@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+</head><body style="margin:0;background:#000">
+<script type="module">
+import * as THREE from 'three';
+const R = new THREE.WebGLRenderer({antialias: false, alpha: true, preserveDrawingBuffer: true, premultipliedAlpha: false});
+R.setPixelRatio(1); R.setClearColor(0x000000, 0); document.body.appendChild(R.domElement);
+const scene = new THREE.Scene(); const cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 2);
+const frag = `
+precision highp float;
+varying vec2 vUv;
+uniform float t; uniform float seed; uniform float heat; uniform float rise; uniform float grow; uniform float soft; uniform float lift;
+float hash(vec3 p){ p = fract(p*0.3183099 + vec3(0.1,0.2,0.3)+seed*0.017); p *= 17.0; return fract(p.x*p.y*p.z*(p.x+p.y+p.z)); }
+float noise(vec3 x){ vec3 i = floor(x); vec3 f = fract(x); f = f*f*(3.0-2.0*f);
+  return mix(mix(mix(hash(i+vec3(0,0,0)),hash(i+vec3(1,0,0)),f.x), mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+             mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x), mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z); }
+float fbm(vec3 p){ float s=0.0, a=0.5; for(int i=0;i<5;i++){ s+=a*noise(p); p=p*2.02+vec3(1.7,9.2,3.1); a*=0.5; } return s; }
+float R0(){ return 0.3 + grow*(1.0-pow(1.0-t, 2.1)); }
+float dens(vec3 p, out float tmp){
+  vec3 c = vec3(0.0, rise*t, 0.0);
+  float R = R0();
+  vec3 q = p - c;
+  vec3 w = q*3.1 + vec3(0.0, -t*1.8, t*0.9);
+  float n = fbm(w + 1.3*vec3(fbm(w+seed), fbm(w+seed+5.2), fbm(w+seed+9.7)));
+  float d = length(q*vec3(1.0,1.1,1.0))/R;
+  float base = 1.0 - d;
+  float fade = t < 0.5 ? 1.0 : pow(max(0.0, 1.0-(t-0.5)/0.5), 1.3);
+  float dd = clamp(base*soft + (n-0.5)*2.3, 0.0, 1.0)*fade;
+  tmp = clamp((base*1.8 + (n-0.42)*1.1)*(1.2-1.25*t), 0.0, 1.0)*heat;
+  return dd;
+}
+vec3 ramp(float T){
+  vec3 c = mix(vec3(0.18,0.05,0.02), vec3(0.85,0.25,0.05), smoothstep(0.0,0.35,T));
+  c = mix(c, vec3(1.0,0.6,0.15), smoothstep(0.3,0.65,T));
+  c = mix(c, vec3(1.0,0.93,0.7), smoothstep(0.65,1.0,T));
+  return c;
+}
+void main(){
+  vec2 p2 = vUv*2.0-1.0;
+  vec3 L = normalize(vec3(-0.6, 0.8, 0.5));
+  vec3 col = vec3(0.0); float Tr = 1.0; const int N = 56; float st = 2.0/float(N);
+  for(int i=0;i<N;i++){
+    float z = 1.0 - (float(i)+0.5)*st;
+    vec3 p = vec3(p2.x, p2.y, z);
+    float tmp; float d = dens(p, tmp);
+    if(d > 0.002){
+      float t2; float ds = dens(p + L*0.12, t2) + dens(p + L*0.26, t2);
+      float light = exp(-ds*2.2);
+      vec3 smokeC = mix(vec3(0.16,0.15,0.15)*lift, vec3(0.62,0.6,0.58)*lift, light);
+      vec3 em = ramp(tmp) * (tmp*tmp*3.2 + tmp*0.4);
+      float a = 1.0 - exp(-d*st*9.0);
+      col += Tr * a * (smokeC*(1.0-min(1.0,tmp*1.6)) + em);
+      Tr *= 1.0 - a;
+      if(Tr < 0.01) break;
+    }
+  }
+  float A = 1.0 - Tr;
+  gl_FragColor = vec4(A > 0.001 ? col / A : vec3(0.0), A);
+}`;
+const vert = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
+const U = {t: {value: 0}, seed: {value: 1}, heat: {value: 1}, rise: {value: 0.3}, grow: {value: 0.62}, soft: {value: 2.0}, lift: {value: 1.0}};
+const m = new THREE.ShaderMaterial({vertexShader: vert, fragmentShader: frag, uniforms: U, transparent: true});
+scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), m));
+window.FX = {
+  frame(S, t, seed, heat, rise, grow, soft, lift){ U.t.value = t; U.seed.value = seed; U.heat.value = heat; U.rise.value = rise; U.grow.value = grow; U.soft.value = soft || 2.0; U.lift.value = lift || 1.0;
+    R.setSize(S, S, false); R.render(scene, cam); return R.domElement.toDataURL('image/png'); }
+};
+window.READY = true;
+</script></body></html>
